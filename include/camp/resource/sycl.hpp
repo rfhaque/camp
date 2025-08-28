@@ -242,12 +242,6 @@ namespace resources
       {
       }
 
-      [[deprecated]]
-      Sycl(sycl::context const& syclContext, int group = -1)
-          : qu(get_a_queue(&syclContext, group))
-      {
-      }
-
       /// Create a resource from a custom queue
       static Sycl SyclFromQueue(sycl::queue& q) { return Sycl(q); }
 
