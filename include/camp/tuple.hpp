@@ -17,6 +17,7 @@
 #include <sstream>
 #include <type_traits>
 
+#include "camp/array.hpp"
 #include "camp/concepts.hpp"
 #include "camp/map.hpp"
 
@@ -50,6 +51,10 @@ using tuple_ebt_t =
 
 template <typename... Args>
 struct tuple_size<tuple<Args...>> : ::camp::num<sizeof...(Args)> {
+};
+
+template <typename T, size_t N>
+struct tuple_size<array<T, N>> : ::camp::num<N> {
 };
 
 template <typename L, typename... Args>
