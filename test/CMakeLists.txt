@@ -55,7 +55,6 @@ function(camp_add_test TESTNAME)
                        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test)
 endfunction()
 
-camp_add_test(array GTEST)
 camp_add_test(errors GTEST)
 camp_add_test(resource GTEST OFFLOAD)
 camp_add_test(tuple GTEST)

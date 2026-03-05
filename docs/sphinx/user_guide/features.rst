@@ -22,7 +22,6 @@ For more information about specific Camp features, visit the pages below.
 .. toctree::
   :maxdepth: 3
 
-  feature/array
   feature/list
   feature/resource
   feature/number
