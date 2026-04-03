@@ -290,6 +290,74 @@ namespace experimental
 
 #ifdef CAMP_ENABLE_CUDA
 
+#if CUDART_VERSION >= 13000
+
+  //! Convert CUDA (cudaMemLocationTypes to string
+  inline const char* to_string(cudaMemLocationType t)
+  {
+    switch (t) {
+      case cudaMemLocationTypeInvalid:
+	return "Invalid";
+      case cudaMemLocationTypeDevice:
+	return "Device";
+      case cudaMemLocationTypeHost:
+	return "Host";
+      case cudaMemLocationTypeHostNuma:
+	return "HostNuma";
+      default:
+	return "Unknown";
+    }
+  }
+
+  //! Print helper for cudaMemLocation
+  inline std::ostream& print_cudaMemLocation(std::ostream& os,
+					     const cudaMemLocation& loc)
+  {
+    os << "cudaMemLocation{type=" << to_string(loc.type)
+       << ", id=" << loc.id << "}";
+    return os;
+  }
+
+#if __cplusplus >= 202002L
+  // SGS RAJA is moving to 2020, is CAMP requiring 2020 as well?
+
+  // Specialization for cudaMemLocation
+  // CUDA does not supply an operator<< for cudaMemLocation
+  // Special the StreamInsertHelper rather than operator<< to avoid polluting std namespace.
+  template <typename T>
+  struct StreamInsertHelper<T&>
+  requires std::is_same_v<std::remove_cv_t<T>, cudaMemLocation>
+  {
+    T& m_val;
+
+    std::ostream& operator()(std::ostream& str) const {
+      return print_cudaMemLocation(str, m_val);
+    }
+  };
+#else
+  // Specialization for non-const cudaMemLocation&
+  template <>
+  struct StreamInsertHelper<cudaMemLocation&> {
+    cudaMemLocation& m_val;
+
+    std::ostream& operator()(std::ostream& str) const {
+      return print_cudaMemLocation(str, m_val);
+    }
+  };
+
+  // Specialization for const cudaMemLocation&
+  template <>
+  struct StreamInsertHelper<const cudaMemLocation&> {
+    const cudaMemLocation& m_val;
+
+    std::ostream& operator()(std::ostream& str) const {
+      return print_cudaMemLocation(str, m_val);
+    }
+  };
+#endif // __cplusplus >= 202002L
+
+#endif // CUDART_VERSION >= 13000
+
   //! Get the argument names for the given cuda API function name.
   //
   //  Returns a space separated string of the arguments to the given function.
