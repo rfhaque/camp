@@ -288,11 +288,25 @@ namespace experimental
   }
 
 
+
 #ifdef CAMP_ENABLE_CUDA
+  
+// SGS Question should the specialization for CUDA 13 cudaMemLocation printing be here?
+// SGS Question Is camp requiring C++20 as well so use "requires std::is_same_v()" simplify non-const / const specialization?
+//  template <typename T>
+//  struct StreamInsertHelper<T&>
+//  requires std::is_same_v<std::remove_cv_t<T>, cudaMemLocation>
+//  {
+//    T& m_val;
+//
+//    std::ostream& operator()(std::ostream& str) const {
+//      return print_cudaMemLocation(str, m_val);
+//    }
+//  };
 
 #if CUDART_VERSION >= 13000
 
-  //! Convert CUDA (cudaMemLocationTypes to string
+  //! Convert CUDA cudaMemLocationType to string
   inline const char* to_string(cudaMemLocationType t)
   {
     switch (t) {
@@ -318,24 +332,10 @@ namespace experimental
     return os;
   }
 
-#if __cplusplus >= 202002L
-  // SGS RAJA is moving to 2020, is CAMP requiring 2020 as well?
-
-  // Specialization for cudaMemLocation
-  // CUDA does not supply an operator<< for cudaMemLocation
-  // Special the StreamInsertHelper rather than operator<< to avoid polluting std namespace.
-  template <typename T>
-  struct StreamInsertHelper<T&>
-  requires std::is_same_v<std::remove_cv_t<T>, cudaMemLocation>
-  {
-    T& m_val;
-
-    std::ostream& operator()(std::ostream& str) const {
-      return print_cudaMemLocation(str, m_val);
-    }
-  };
-#else
-  // Specialization for non-const cudaMemLocation&
+  //! Specialization for printing of cudaMemLocation&
+  //
+  // CUDA does not supply an operator<< for cudaMemLocation.
+  // Specialize the StreamInsertHelper rather than operator<< to avoid conflicts.
   template <>
   struct StreamInsertHelper<cudaMemLocation&> {
     cudaMemLocation& m_val;
@@ -345,7 +345,10 @@ namespace experimental
     }
   };
 
-  // Specialization for const cudaMemLocation&
+  //! Specialization for printing of const cudaMemLocation&
+  //
+  // CUDA does not supply an operator<< for cudaMemLocation.
+  // Specialize the StreamInsertHelper rather than operator<< to avoid conflicts.
   template <>
   struct StreamInsertHelper<const cudaMemLocation&> {
     const cudaMemLocation& m_val;
@@ -354,8 +357,6 @@ namespace experimental
       return print_cudaMemLocation(str, m_val);
     }
   };
-#endif // __cplusplus >= 202002L
-
 #endif // CUDART_VERSION >= 13000
 
   //! Get the argument names for the given cuda API function name.
