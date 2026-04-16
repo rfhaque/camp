@@ -304,13 +304,13 @@ namespace experimental
   {
     switch (t) {
       case cudaMemLocationTypeInvalid:
-	return "Invalid";
+	return "cudaMemLocationTypeInvalid";
       case cudaMemLocationTypeDevice:
-	return "Device";
+	return "cudaMemLocationTypeDevice";
       case cudaMemLocationTypeHost:
-	return "Host";
+	return "cudaMemLocationTypeHost";
       case cudaMemLocationTypeHostNuma:
-	return "HostNuma";
+	return "cudaMemLocationTypeHostNuma";
       default:
 	return "Unknown";
     }
@@ -320,8 +320,7 @@ namespace experimental
   inline std::ostream& print_cudaMemLocation(std::ostream& os,
 					     const cudaMemLocation& loc)
   {
-    os << "cudaMemLocation{type=" << to_string(loc.type)
-       << ", id=" << loc.id << "}";
+    os << "{" <<  to_string(loc.type) << "," << loc.id << "}";
     return os;
   }
 
