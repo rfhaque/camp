@@ -300,7 +300,7 @@ namespace experimental
   // 13 cudaMemLocation it is a struct.
 
   //! Convert CUDA cudaMemLocationType to string
-  inline const char* to_string(cudaMemLocationType t)
+  constexpr std::string_view to_string(cudaMemLocationType t)
   {
     switch (t) {
       case cudaMemLocationTypeInvalid:
@@ -320,11 +320,11 @@ namespace experimental
   inline std::ostream& print_cudaMemLocation(std::ostream& os,
 					     const cudaMemLocation& loc)
   {
-    os << "{" <<  to_string(loc.type) << "," << loc.id << "}";
+    os << "{" <<  to_string(loc.type) << ", " << loc.id << "}";
     return os;
   }
 
-  //! Specialization for printing of cudaMemLocation&
+  //! Specialization for printing cudaMemLocation&
   //
   // Invoking CUDA methods via CAMP_CUDA_API_INVOKE_AND_CHECK() may
   // have cudaMemLocation arguments which require I/O for error
