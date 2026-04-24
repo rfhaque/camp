@@ -43,12 +43,8 @@ FROM ${BASE_IMG} AS base
 ARG VER
 ARG BASE_IMG
 ENV GTEST_COLOR=1
-COPY --chown=axom:axom ./scripts/ /scripts/
-WORKDIR /home/
-RUN /scripts/get-deps.sh
-# This is duplicative, but allows us to cache the dep installation while
-# changing the sources and scripts, saves time in the development loop
-COPY --chown=axom:axom . /home/
+COPY . /home/camp/workspace
+WORKDIR /home/camp/workspace
 
 FROM base AS test
 ARG PRE_CMD
