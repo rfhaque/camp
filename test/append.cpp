@@ -18,4 +18,4 @@ CAMP_CHECK_TSAME((append<list2, list1>), (list<int, int, char, list<float, doubl
 CAMP_CHECK_TSAME((append<list<int>, int>), (list<int, int>));
 CAMP_CHECK_TSAME((append<list1, int>), (list<float, double, double, int>));
 CAMP_CHECK_TSAME((append<list<>, int>), (list<int>));
-CAMP_CHECK_TSAME((append<list<>, list<char,int>>), (list<list<char, int>>));
+CAMP_CHECK_TSAME((append<list<>, list<char, int>>), (list<list<char, int>>));
