@@ -1,8 +1,10 @@
+
 [comment]: # (#################################################################)
-[comment]: # (Copyright 2018-25, Lawrence Livermore National Security, LLC)
-[comment]: # (and Camp project contributors. See the camp/LICENSE file)
-[comment]: # (for details.)
-[comment]: # 
+[comment]: # (Copyright Lawrence Livermore National Security, LLC and other)
+[comment]: # (Camp Project Developers. See top-level LICENSE and COPYRIGHT)
+[comment]: # (files for dates and other details. No copyright assignment is)
+[comment]: # (required to contribute to Camp.)
+[comment]: #
 [comment]: # (# SPDX-License-Identifier: BSD-3-Clause)
 [comment]: # (#################################################################)
 
