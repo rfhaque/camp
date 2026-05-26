@@ -34,16 +34,28 @@ namespace resources
     class SyclEvent
     {
     public:
-      // TODO: make this actually work
-      SyclEvent(sycl::queue& CAMP_UNUSED_ARG(qu)) { m_event = sycl::event(); }
+      explicit SyclEvent(sycl::event e)
+        : m_event(std::move(e))
+      {}
+
+      // TODO: see what overhead an empty submit has
+      SyclEvent(sycl::queue& qu)
+        : m_event(qu.submit([&](::sycl::handler& CAMP_UNUSED_ARG(h)) {}))
+      {}
 
       SyclEvent(Sycl& res);
 
-      bool check() const { return true; }
+      bool check() const
+      {
+        return m_event.get_info<sycl::info::event::command_execution_status>()
+            == sycl::info::event_command_status::complete;
+      }
 
-      void wait() const { getSyclEvent_t().wait(); }
+      void wait() const { m_event.wait(); }
 
-      sycl::event getSyclEvent_t() const { return m_event; }
+      sycl::event& getSyclEvent_t() { return m_event; }
+
+      sycl::event const& getSyclEvent_t() const { return m_event; }
 
     private:
       sycl::event m_event;
@@ -356,7 +368,7 @@ namespace resources
 
     inline SyclEvent::SyclEvent(Sycl &res)
       : SyclEvent(res.get_queue())
-    { }
+    {}
 
   }  // namespace v1
 
