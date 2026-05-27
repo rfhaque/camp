@@ -181,10 +181,12 @@ namespace resources
       };
 
       template <typename T>
-      class EventModel : public EventInterface
+      class EventModel final : public EventInterface
       {
       public:
-        EventModel(T const &modelVal) : m_modelVal(modelVal) {}
+        EventModel(T modelVal)
+          : m_modelVal(std::move(modelVal))
+        {}
 
         Platform get_platform() const override
         {
@@ -198,13 +200,19 @@ namespace resources
 
         size_t get_hash() const override { return m_modelVal.get_hash(); }
 
-        bool check() const override { return m_modelVal.check(); }
+        bool check() const override
+        {
+          return m_modelVal.check();
+        }
 
-        void wait() const override { m_modelVal.wait(); }
+        void wait() const override
+        {
+          m_modelVal.wait();
+        }
 
-        const T* get() const { return &m_modelVal; }
+        T const& get() const { return m_modelVal; }
 
-        T* get() { return &m_modelVal; }
+        T& get() { return m_modelVal; }
 
       private:
         T m_modelVal;
