@@ -277,7 +277,9 @@ namespace resources
       {
         auto* sycl_event = e->try_get<SyclEvent>();
         if (sycl_event) {
-          (sycl_event->getSyclEvent_t()).wait();
+          qu.submit([&](::sycl::handler& h) {
+            h.depends_on(sycl_event->getSyclEvent_t());
+          });
         } else {
           e->wait();
         }
