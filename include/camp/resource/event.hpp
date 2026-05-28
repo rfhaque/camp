@@ -81,7 +81,7 @@ namespace resources
       }
 
       template <typename T>
-      T& get()
+      T& get() &
       {
         T* result = try_get<T>();
         if (result == nullptr) {
@@ -91,7 +91,7 @@ namespace resources
       }
 
       template <typename T>
-      T const& get() const
+      T const& get() const&
       {
         T const* result = try_get<T>();
         if (result == nullptr) {
@@ -100,11 +100,34 @@ namespace resources
         return *result;
       }
 
-      Platform get_platform() const { return m_value->get_platform(); }
+      template <typename T>
+      T get() &&
+      {
+        T* result = try_get<T>();
+        if (result == nullptr) {
+          ::camp::throw_re("Incompatible Event type get cast.");
+        }
+        return std::move(*result);
+      }
 
-      bool check() const { return m_value->check(); }
+      template <typename T>
+      T get() const&&
+      {
+        T const* result = try_get<T>();
+        if (result == nullptr) {
+          ::camp::throw_re("Incompatible Event type get cast.");
+        }
+        return std::move(*result);
+      }
 
-      void wait() const { m_value->wait(); }
+      Platform get_platform() const
+      {
+        return m_value ? m_value->get_platform() : Platform::undefined;
+      }
+
+      bool check() const { return m_value ? m_value->check() : true; }
+
+      void wait() const { if (m_value) { m_value->wait(); } }
 
       /*
        * \brief Compares two Events to see if they are equal. Two Events
@@ -115,6 +138,13 @@ namespace resources
        */
       friend inline bool operator==(Event const &lhs, Event const &rhs)
       {
+        if (!lhs.m_value && !rhs.m_value) {
+          return true;
+        }
+        if ((!lhs.m_value && rhs.m_value) ||
+            (lhs.m_value && !rhs.m_value)) {
+          return false;
+        }
         if (lhs.get_platform() == rhs.get_platform()) {
           return lhs.m_value->compare(rhs);
         }
@@ -133,7 +163,7 @@ namespace resources
        * platform and stream/queue combination.
        *
        */
-      size_t get_hash() const { return m_value->get_hash(); }
+      size_t get_hash() const { return m_value ? m_value->get_hash() : 0u; }
 
       class EventInterface
       {
