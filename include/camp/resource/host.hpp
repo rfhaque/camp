@@ -39,7 +39,7 @@ namespace resources
        *
        * \return True or false depending on if this is the same event
        */
-      friend inline bool operator==(CudaEvent const& lhs, CudaEvent const& rhs) = default;
+      friend inline bool operator==(HostEvent const& lhs, HostEvent const& rhs) = default;
 
       size_t get_hash() const
       {
