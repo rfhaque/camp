@@ -259,13 +259,8 @@ void test_map_key(Resource& h)
 //
 TEST(CampResource, UnorderedMapKey)
 {
-#if !defined(CAMP_HAVE_CUDA) && !defined(CAMP_HAVE_HIP) \
-    && !defined(CAMP_HAVE_OMP_OFFLOAD) && !defined(CAMP_HAVE_SYCL)
-  // If only the Host is enabled, it doesn't make sense to use a map
-  GTEST_SKIP() << "No device backend available (CUDA/HIP/OMP/SYCL)";
-#else
-
   Resource h{Host()};
+  test_map_key<Host>(h);
 #if defined(CAMP_HAVE_CUDA)
   test_map_key<Cuda>(h);
 #elif defined(CAMP_HAVE_HIP)
@@ -274,8 +269,6 @@ TEST(CampResource, UnorderedMapKey)
   test_map_key<Omp>(h);
 #elif defined(CAMP_HAVE_SYCL)
   test_map_key<Sycl>(h);
-#endif
-
 #endif
 }
 
@@ -344,13 +337,8 @@ void test_map_key(Event& he)
 //
 TEST(CampEvent, UnorderedMapKey)
 {
-#if !defined(CAMP_HAVE_CUDA) && !defined(CAMP_HAVE_HIP) \
-    && !defined(CAMP_HAVE_OMP_OFFLOAD) && !defined(CAMP_HAVE_SYCL)
-  // If only the Host is enabled, it doesn't make sense to use a map
-  GTEST_SKIP() << "No device backend available (CUDA/HIP/OMP/SYCL)";
-#else
-
   Event he{Host().get_event_erased()};
+  test_map_key<Host>(he);
 #if defined(CAMP_HAVE_CUDA)
   test_map_key<Cuda>(he);
 #elif defined(CAMP_HAVE_HIP)
@@ -359,8 +347,6 @@ TEST(CampEvent, UnorderedMapKey)
   test_map_key<Omp>(he);
 #elif defined(CAMP_HAVE_SYCL)
   test_map_key<Sycl>(he);
-#endif
-
 #endif
 }
 
