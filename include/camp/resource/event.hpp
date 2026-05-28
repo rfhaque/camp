@@ -50,7 +50,7 @@ namespace resources
                                         *>::value)>::type * = nullptr>
       Event(T &&value)
       {
-        m_value.reset(new EventModel<T>(value));
+        m_value.reset(new EventModel<type::ref::rem<T>>(value));
       }
 
       template <typename T>
