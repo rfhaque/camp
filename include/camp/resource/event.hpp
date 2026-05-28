@@ -13,9 +13,13 @@
 #include <memory>
 #include <type_traits>
 
+#include "camp/concepts.hpp"
 #include "camp/config.hpp"
 #include "camp/defines.hpp"
 #include "camp/helpers.hpp"
+
+// last to ensure we don't hide breakage in the others
+#include "camp/resource/platform.hpp"
 
 namespace camp
 {
