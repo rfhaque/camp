@@ -52,18 +52,49 @@ namespace resources
       template <typename T>
       T *try_get()
       {
+        if (!m_value) {
+          return nullptr;
+        }
         auto result = dynamic_cast<EventModel<T> *>(m_value.get());
+        if (!result) {
+          return nullptr;
+        }
         return result->get();
       }
 
       template <typename T>
-      T get()
+      T const*try_get() const
       {
+        if (!m_value) {
+          return nullptr;
+        }
         auto result = dynamic_cast<EventModel<T> *>(m_value.get());
+        if (!result) {
+          return nullptr;
+        }
+        return result->get();
+      }
+
+      template <typename T>
+      T& get()
+      {
+        T* result = try_get<T>();
         if (result == nullptr) {
           ::camp::throw_re("Incompatible Event type get cast.");
         }
-        return *result->get();
+        return *result;
+      }
+
+      template <typename T>
+      T const& get() const
+      {
+        T const* result = try_get<T>();
+        if (result == nullptr) {
+          ::camp::throw_re("Incompatible Event type get cast.");
+        }
+        return *result;
+      }
+
       Platform get_platform() const { return m_value->get_platform(); }
 
       bool check() const { return m_value->check(); }
@@ -134,6 +165,8 @@ namespace resources
         bool check() const override { return m_modelVal.check(); }
 
         void wait() const override { m_modelVal.wait(); }
+
+        T const*get() const { return &m_modelVal; }
 
         T *get() { return &m_modelVal; }
 

@@ -85,18 +85,47 @@ namespace resources
       template <typename T>
       T *try_get()
       {
+        if (!m_value) {
+          return nullptr;
+        }
         auto result = dynamic_cast<ContextModel<T> *>(m_value.get());
-        return result ? result->get() : nullptr;
+        if (!result) {
+          return nullptr;
+        }
+        return result->get();
       }
 
       template <typename T>
-      T get() const
+      T const*try_get() const
       {
+        if (!m_value) {
+          return nullptr;
+        }
         auto result = dynamic_cast<ContextModel<T> *>(m_value.get());
+        if (!result) {
+          return nullptr;
+        }
+        return result->get();
+      }
+
+      template <typename T>
+      T& get()
+      {
+        T* result = try_get<T>();
         if (result == nullptr) {
           ::camp::throw_re("Incompatible Resource type get cast.");
         }
-        return *result->get();
+        return *result;
+      }
+
+      template <typename T>
+      T const& get() const
+      {
+        T const* result = try_get<T>();
+        if (result == nullptr) {
+          ::camp::throw_re("Incompatible Resource type get cast.");
+        }
+        return *result;
       }
 
       Platform get_platform() const { return m_value->get_platform(); }
@@ -246,6 +275,7 @@ namespace resources
 
         void wait() override { m_modelVal.wait(); }
 
+        T const*get() const { return &m_modelVal; }
         T *get() { return &m_modelVal; }
 
       private:
