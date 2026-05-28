@@ -342,6 +342,9 @@ namespace resources
 }  // namespace resources
 }  // namespace camp
 
+namespace std
+{
+
 /*
  * \brief Specialization of std::hash for camp::resources::Resource
  *
@@ -351,8 +354,6 @@ namespace resources
  *
  * \return A size_t hash value
  */
-namespace std
-{
 template <>
 struct hash<camp::resources::Resource> {
   std::size_t operator()(const camp::resources::Resource &r) const
@@ -360,6 +361,7 @@ struct hash<camp::resources::Resource> {
     return r.get_hash();
   }
 };
+
 }  // namespace std
 
 #endif /* __CAMP_RESOURCE_HPP */

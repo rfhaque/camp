@@ -49,10 +49,6 @@ namespace resources
         m_value.reset(new EventModel<T>(value));
       }
 
-      bool check() const { return m_value->check(); }
-
-      void wait() const { m_value->wait(); }
-
       template <typename T>
       T *try_get()
       {
@@ -68,13 +64,50 @@ namespace resources
           ::camp::throw_re("Incompatible Event type get cast.");
         }
         return *result->get();
+      Platform get_platform() const { return m_value->get_platform(); }
+
+      bool check() const { return m_value->check(); }
+
+      void wait() const { m_value->wait(); }
+
+      /*
+       * \brief Compares two Resources to see if they are equal. Two Resources
+       * are equal if they have the platform and same stream/queue
+       *
+       * \return True if they have the same platform and stream/queue, false
+       * otherwise.
+       */
+      friend inline bool operator==(Event const &lhs, Event const &rhs)
+      {
+        if (lhs.get_platform() == rhs.get_platform()) {
+          return lhs.m_value->compare(rhs);
+        }
+        return false;
       }
 
     private:
+      friend struct std::hash<camp::resources::Event>;
+
+      /*
+       * \brief Retrieves the a hash for this Event.
+       * The hash allows Events to be used as keys in data structures
+       * like unordered maps.
+       *
+       * \return A size_t hash value for this Event's
+       * platform and stream/queue combination.
+       *
+       */
+      size_t get_hash() const { return m_value->get_hash(); }
+
       class EventInterface
       {
       public:
         virtual ~EventInterface() {}
+
+        virtual Platform get_platform() const = 0;
+
+        virtual bool compare(Event const &e) const = 0;
+        virtual size_t get_hash() const = 0;
 
         virtual bool check() const = 0;
         virtual void wait() const = 0;
@@ -85,6 +118,18 @@ namespace resources
       {
       public:
         EventModel(T const &modelVal) : m_modelVal(modelVal) {}
+
+        Platform get_platform() const override
+        {
+          return m_modelVal.get_platform();
+        }
+
+        bool compare(Resource const &e) const override
+        {
+          return m_modelVal == e.get<T>();
+        }
+
+        size_t get_hash() const override { return m_modelVal.get_hash(); }
 
         bool check() const override { return m_modelVal.check(); }
 
@@ -102,4 +147,27 @@ namespace resources
   }  // namespace v1
 }  // namespace resources
 }  // namespace camp
+
+namespace std
+{
+
+/*
+ * \brief Specialization of std::hash for camp::resources::Event
+ *
+ * Provides a hash function for Event objects, enabling their use as keys
+ * in unordered associative containers (std::unordered_map, std::unordered_set,
+ * etc.)
+ *
+ * \return A size_t hash value
+ */
+template <>
+struct hash<camp::resources::Event> {
+  std::size_t operator()(const camp::resources::Event &e) const
+  {
+    return e.get_hash();
+  }
+};
+
+}  // namespace std
+
 #endif /* __CAMP_EVENT_HPP */
