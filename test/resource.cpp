@@ -659,6 +659,63 @@ TEST(CampResource, Wait)
 }
 
 template <typename Res>
+void test_event_wait()
+{
+  auto r = Res();
+  const auto typed_event = r.get_event();
+  const Event event = r.get_event_erased();
+  typed_event.wait();
+  event.wait();
+}
+
+//
+TEST(CampEvent, Wait)
+{
+  test_event_wait<Host>();
+#ifdef CAMP_HAVE_CUDA
+  test_event_wait<Cuda>();
+#endif
+#ifdef CAMP_HAVE_HIP
+  test_event_wait<Hip>();
+#endif
+#ifdef CAMP_HAVE_OMP_OFFLOAD
+  test_event_wait<Omp>();
+#endif
+#ifdef CAMP_HAVE_SYCL
+  test_event_wait<Sycl>();
+#endif
+}
+
+template <typename Res>
+void test_event_check()
+{
+  auto r = Res();
+  const auto typed_event = r.get_event();
+  const Event event = r.get_event_erased();
+  // checking in a loop should always eventually return true
+  while (!typed_event.check()) {}
+  while (!event.check()) {}
+}
+
+//
+TEST(CampEvent, Check)
+{
+  test_event_check<Host>();
+#ifdef CAMP_HAVE_CUDA
+  test_event_check<Cuda>();
+#endif
+#ifdef CAMP_HAVE_HIP
+  test_event_check<Hip>();
+#endif
+#ifdef CAMP_HAVE_OMP_OFFLOAD
+  test_event_check<Omp>();
+#endif
+#ifdef CAMP_HAVE_SYCL
+  test_event_check<Sycl>();
+#endif
+}
+
+template <typename Res>
 void test_concrete_resource_trait()
 {
   ASSERT_TRUE(is_concrete_resource<Res>::value);
