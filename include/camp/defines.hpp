@@ -163,6 +163,8 @@ namespace camp
 // or 'A' general platform stream created by camp Resource
 #ifndef CAMP_USE_PLATFORM_DEFAULT_STREAM
 #define CAMP_USE_PLATFORM_DEFAULT_STREAM 0
+#else
+#define CAMP_USE_PLATFORM_DEFAULT_STREAM 1
 #endif
 
 
