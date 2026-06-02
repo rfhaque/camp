@@ -897,7 +897,7 @@ void test_get_typed_event(EventArgs&&... eventArgs)
 {
   Resource r{Res()};
   Event erased_event = r.get_event();
-  auto typed_event = erased_event.get<ResEvent>();
+  auto&& typed_event = erased_event.get<ResEvent>();
   ResEvent event(std::forward<EventArgs>(eventArgs)...);
   ASSERT_EQ(typeid(event), typeid(typed_event));
 }
@@ -1031,8 +1031,10 @@ void test_wait()
 {
   auto r = Res();
   r.wait();
-  Event event = r.get_event_erased();
-  r.wait_for(&event);
+  Event erased_event = r.get_event_erased();
+  r.wait_for(&erased_event);
+  auto typed_event = r.get_event();
+  r.wait_for(&typed_event);
   Resource er(r);
   er.wait();
 }
