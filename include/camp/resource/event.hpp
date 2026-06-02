@@ -49,7 +49,7 @@ namespace resources
       }
 
       template <typename T>
-      T *try_get()
+      T* try_get()
       {
         if (!m_value) {
           return nullptr;
@@ -58,11 +58,11 @@ namespace resources
         if (!result) {
           return nullptr;
         }
-        return result->get();
+        return &result->get();
       }
 
       template <typename T>
-      T const*try_get() const
+      T const* try_get() const
       {
         if (!m_value) {
           return nullptr;
@@ -95,7 +95,7 @@ namespace resources
       }
 
       template <typename T>
-      T get() &&
+      T && get() &&
       {
         T* result = try_get<T>();
         if (result == nullptr) {
@@ -105,7 +105,7 @@ namespace resources
       }
 
       template <typename T>
-      T get() const&&
+      T const&& get() const&&
       {
         T const* result = try_get<T>();
         if (result == nullptr) {
@@ -218,9 +218,13 @@ namespace resources
           m_modelVal.wait();
         }
 
-        T const& get() const { return m_modelVal; }
+        T const& get() const& { return m_modelVal; }
 
-        T& get() { return m_modelVal; }
+        T& get() & { return m_modelVal; }
+
+        T const&& get() const&& { return m_modelVal; }
+
+        T&& get() && { return m_modelVal; }
 
       private:
         T m_modelVal;
