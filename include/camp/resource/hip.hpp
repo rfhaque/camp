@@ -74,12 +74,12 @@ namespace resources
     class HipEvent
     {
     public:
-      explicit HipEvent(hipStream_t stream) { init(stream); }
+      explicit HipEvent(hipStream_t stream) : m_event(init(stream)) {}
 
       HipEvent(HipEvent const&) = delete;
 
       HipEvent(HipEvent&& rhs) noexcept
-        : m_event(::camp::exchange(rhs.m_event, nullptr))
+        : m_event(std::exchange(rhs.m_event, nullptr))
       {}
 
       HipEvent& operator=(HipEvent const&) = delete;
@@ -88,7 +88,7 @@ namespace resources
       HipEvent& operator=(HipEvent&& rhs) noexcept
       {
         finalize(m_event);
-        m_event = ::camp::exchange(rhs.m_event, nullptr);
+        m_event = std::exchange(rhs.m_event, nullptr);
         return *this;
       }
 
@@ -132,12 +132,14 @@ namespace resources
       // note that hipEvent_t is an alias for a pointer and is nullable
       hipEvent_t m_event;
 
-      void init(hipStream_t stream)
+      static hipEvent_t init(hipStream_t stream)
       {
+        hipEvent_t event;
         CAMP_HIP_API_INVOKE_AND_CHECK(hipEventCreateWithFlags,
-                                      &m_event,
+                                      &event,
                                       hipEventDisableTiming);
-        CAMP_HIP_API_INVOKE_AND_CHECK(hipEventRecord, m_event, stream);
+        CAMP_HIP_API_INVOKE_AND_CHECK(hipEventRecord, event, stream);
+        return event;
       }
 
       static void finalize(hipEvent_t& event)

@@ -138,7 +138,7 @@ namespace resources
         CAMP_CUDA_API_INVOKE_AND_CHECK(cudaEventCreateWithFlags,
                                        &event,
                                        cudaEventDisableTiming);
-        CAMP_CUDA_API_INVOKE_AND_CHECK(cudaEventRecord, m_event, stream);
+        CAMP_CUDA_API_INVOKE_AND_CHECK(cudaEventRecord, event, stream);
         return event;
       }
 
