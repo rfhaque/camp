@@ -238,9 +238,13 @@ namespace resources
         return h;
       }
 
-      HipEvent get_event() { return HipEvent(*this); }
+      HipEvent get_event()
+      {
+        auto d{device_guard(get_device())};
+        return HipEvent(get_stream());
+      }
 
-      Event get_event_erased() { return Event{HipEvent(*this)}; }
+      Event get_event_erased() { return Event{get_event()}; }
 
       void wait()
       {
@@ -248,15 +252,24 @@ namespace resources
         CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamSynchronize, stream);
       }
 
+      void wait_for(HipEvent *e)
+      {
+        if (!e) {
+          return;
+        }
+        auto d{device_guard(device)};
+        CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamWaitEvent,
+                                      get_stream(),
+                                      e->getHipEvent_t(),
+                                      0);
+      }
       void wait_for(Event *e)
       {
-        auto *hip_event = e->try_get<HipEvent>();
-        if (hip_event) {
-          auto d{device_guard(device)};
-          CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamWaitEvent,
-                                        get_stream(),
-                                        hip_event->getHipEvent_t(),
-                                        0);
+        if (!e) {
+          return;
+        }
+        if (auto hip_event = e->try_get<HipEvent>()) {
+          wait_for(hip_event);
         } else {
           e->wait();
         }

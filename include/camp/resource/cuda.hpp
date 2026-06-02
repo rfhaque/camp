@@ -239,9 +239,13 @@ namespace resources
         return c;
       }
 
-      CudaEvent get_event() { return CudaEvent(*this); }
+      CudaEvent get_event()
+      {
+        auto d{device_guard(get_device())};
+        return CudaEvent(res.get_stream());
+      }
 
-      Event get_event_erased() { return Event{CudaEvent(*this)}; }
+      Event get_event_erased() { return Event{get_event()}; }
 
       void wait()
       {
@@ -249,15 +253,25 @@ namespace resources
         CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamSynchronize, stream);
       }
 
+      void wait_for(CudaEvent *e)
+      {
+        if (!e) {
+          return;
+        }
+        auto d{device_guard(device)};
+        CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamWaitEvent,
+                                       get_stream(),
+                                       e->getCudaEvent_t(),
+                                       0);
+      }
+
       void wait_for(Event *e)
       {
-        auto *cuda_event = e->try_get<CudaEvent>();
-        if (cuda_event) {
-          auto d{device_guard(device)};
-          CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamWaitEvent,
-                                         get_stream(),
-                                         cuda_event->getCudaEvent_t(),
-                                         0);
+        if (!e) {
+          return;
+        }
+        if (auto cuda_event = e->try_get<CudaEvent>()) {
+          wait_for(cuda_event);
         } else {
           e->wait();
         }

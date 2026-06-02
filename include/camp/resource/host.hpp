@@ -93,15 +93,25 @@ namespace resources
 
       HostEvent get_event() { return HostEvent(); }
 
-      Event get_event_erased()
-      {
-        Event e{HostEvent()};
-        return e;
-      }
+      Event get_event_erased() { return Event{get_event()}; }
 
       void wait() {}
 
-      void wait_for(Event *e) { e->wait(); }
+      void wait_for(HostEvent *e)
+      {
+        if (!e) {
+          return;
+        }
+        e->wait();
+      }
+
+      void wait_for(Event *e)
+      {
+        if (!e) {
+          return;
+        }
+        e->wait();
+      }
 
       // Memory
       template <typename T>

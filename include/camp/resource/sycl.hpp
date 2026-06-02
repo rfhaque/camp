@@ -312,19 +312,29 @@ namespace resources
       Platform get_platform() const { return Platform::sycl; }
 
       // Event
-      SyclEvent get_event() { return SyclEvent(*this); }
+      SyclEvent get_event() { return SyclEvent(get_queue()); }
 
-      Event get_event_erased() { return Event{SyclEvent(*this)}; }
+      Event get_event_erased() { return Event{get_event()}; }
 
       void wait() { qu.wait(); }
 
+      void wait_for(SyclEvent* e)
+      {
+        if (!e) {
+          return;
+        }
+        qu.submit([&](::sycl::handler& h) {
+          h.depends_on(e->getSyclEvent_t());
+        });
+      }
+
       void wait_for(Event* e)
       {
-        auto* sycl_event = e->try_get<SyclEvent>();
-        if (sycl_event) {
-          qu.submit([&](::sycl::handler& h) {
-            h.depends_on(sycl_event->getSyclEvent_t());
-          });
+        if (!e) {
+          return;
+        }
+        if (auto sycl_event = e->try_get<SyclEvent>()) {
+          wait_for(sycl_event);
         } else {
           e->wait();
         }

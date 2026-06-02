@@ -190,18 +190,28 @@ namespace resources
         }
       }
 
+      void wait_for(OmpEvent *e)
+      {
+        if (!e) {
+          return;
+        }
+        char *local_addr = addr;
+        char *other_addr = (char *)e->getEventAddr();
+        CAMP_ALLOW_UNUSED_LOCAL(local_addr);
+        CAMP_ALLOW_UNUSED_LOCAL(other_addr);
+#pragma omp target depend(inout : local_addr[0]) depend(in : other_addr[0]) \
+  nowait
+        {
+        }
+      }
+
       void wait_for(Event *e)
       {
-        OmpEvent *oe = e->try_get<OmpEvent>();
-        if (oe) {
-          char *local_addr = addr;
-          char *other_addr = (char *)oe->getEventAddr();
-          CAMP_ALLOW_UNUSED_LOCAL(local_addr);
-          CAMP_ALLOW_UNUSED_LOCAL(other_addr);
-#pragma omp target depend(inout : local_addr[0]) depend(in : other_addr[0]) \
-    nowait
-          {
-          }
+        if (!e) {
+          return;
+        }
+        if (auto omp_event = e->try_get<OmpEvent>()) {
+          wait_for(omp_event);
         } else {
           e->wait();
         }
