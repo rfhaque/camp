@@ -242,7 +242,7 @@ namespace resources
       CudaEvent get_event()
       {
         auto d{device_guard(get_device())};
-        return CudaEvent(res.get_stream());
+        return CudaEvent(get_stream());
       }
 
       Event get_event_erased() { return Event{get_event()}; }
