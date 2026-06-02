@@ -43,7 +43,7 @@ namespace resources
       Event &operator=(Event &&e) = default;
 
       template <camp::concepts::ConcreteEvent T>
-      explicit Event(T &&value)
+      Event(T &&value)
       {
         m_value.reset(new EventModel<type::ref::rem<T>>(std::forward<T>(value)));
       }
