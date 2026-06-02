@@ -195,6 +195,145 @@ TEST(CampEvent, GetPlatform)
 }
 
 template <typename Res>
+void test_vector(Resource& h)
+{
+  // Generic
+  std::vector<Resource> vec;
+  Resource d1{Res()};
+  Resource d2{Res()};
+
+  // Typed
+  std::vector<Res> rvec;
+  Res r1;
+  Res r2;
+
+  // Generic
+  vec.emplace_back(Host());
+  vec.emplace_back(h);
+  vec.emplace_back(d1);
+  vec.emplace_back(r1);
+
+  // Typed
+  rvec.emplace_back(Res());
+  rvec.emplace_back(d2.get<Res>());
+  rvec.emplace_back(r2);
+
+  // Verify using Resource in a vector to works
+  // Generic
+  ASSERT_EQ(vec.size(), 4);
+  ASSERT_EQ(vec[0], h);
+  ASSERT_EQ(vec[1], h);
+  ASSERT_EQ(vec[2], d1);
+  ASSERT_EQ(vec[3], r1);
+
+  // Typed
+  ASSERT_EQ(rvec.size(), 3);
+  if constexpr (std::same_as<Res, Host>) {
+    ASSERT_EQ(rvec[0], Res());
+  } else {
+    ASSERT_NE(rvec[0], Res());
+  }
+  ASSERT_EQ(rvec[1], d2);
+  ASSERT_EQ(rvec[2], r2);
+}
+
+//
+TEST(CampResource, Vector)
+{
+  Resource h{Host()};
+  test_vector<Host>(h);
+#if defined(CAMP_HAVE_CUDA)
+  test_vector<Cuda>(h);
+#elif defined(CAMP_HAVE_HIP)
+  test_vector<Hip>(h);
+#elif defined(CAMP_HAVE_OMP_OFFLOAD)
+  test_vector<Omp>(h);
+#elif defined(CAMP_HAVE_SYCL)
+  test_vector<Sycl>(h);
+#endif
+}
+
+template <typename Res>
+void test_vector(Event& he)
+{
+  using typed_event = typename Res::event_type;
+
+  // Generic
+  Event d1 = Res().get_event_erased();
+  Event d2 = Res().get_event_erased();
+  std::vector<Event> vec;
+
+  // Typed
+  typed_event e1 = Res().get_event();
+  typed_event e2 = Res().get_event();
+  std::vector<typed_event> rvec;
+
+  // Generic
+  vec.emplace_back(Host().get_event());
+  vec.emplace_back(Host().get_event_erased());
+  vec.emplace_back(std::move(d1));
+  vec.emplace_back(std::move(e1));
+  vec.emplace_back(Res().get_event());
+  vec.emplace_back(Res().get_event_erased());
+
+  // Typed
+  rvec.emplace_back(std::move(std::move(d2).get<typed_event>()));
+  rvec.emplace_back(std::move(e2));
+  rvec.emplace_back(Res().get_event());
+
+  // Verify using Event in a vector works
+  // Generic
+  ASSERT_EQ(vec.size(), 6);
+  ASSERT_EQ(vec[0], he);
+  ASSERT_EQ(vec[0], vec[1]);
+  if constexpr (std::same_as<Res, Host>) {
+    ASSERT_EQ(vec[1], vec[2]);
+    ASSERT_EQ(vec[2], vec[3]);
+    ASSERT_EQ(vec[3], vec[4]);
+    ASSERT_EQ(vec[4], vec[5]);
+  } else {
+    ASSERT_NE(vec[1], vec[2]);
+    ASSERT_NE(vec[2], vec[3]);
+    ASSERT_NE(vec[3], vec[4]);
+    ASSERT_NE(vec[4], vec[5]);
+  }
+
+  for (Event& e : vec) {
+    (void)e;
+  }
+
+  // Typed
+  ASSERT_EQ(rvec.size(), 3);
+  if constexpr (std::same_as<Res, Host>) {
+    ASSERT_EQ(rvec[0], rvec[1]);
+    ASSERT_EQ(rvec[1], rvec[2]);
+  } else {
+    ASSERT_NE(rvec[0], rvec[1]);
+    ASSERT_NE(rvec[1], rvec[2]);
+  }
+
+  for (typed_event& e : rvec) {
+    (void)e;
+  }
+}
+
+//
+TEST(CampEvent, Vector)
+{
+  Event he = Host().get_event_erased();
+  test_vector<Host>(he);
+#if defined(CAMP_HAVE_CUDA)
+  test_vector<Cuda>(he);
+#elif defined(CAMP_HAVE_HIP)
+  test_vector<Hip>(he);
+#elif defined(CAMP_HAVE_OMP_OFFLOAD)
+  test_vector<Omp>(he);
+#elif defined(CAMP_HAVE_SYCL)
+  test_vector<Sycl>(he);
+#endif
+}
+
+template <typename Res>
 void test_map_key(Resource& h)
 {
   // Generic
