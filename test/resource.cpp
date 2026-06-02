@@ -1142,6 +1142,8 @@ TEST(CampResourceTypeTraits, ConcreteResource)
   test_concrete_resource_trait<Omp>();
 #endif
 
+  // Resource is not a concrete resource
+  ASSERT_FALSE(is_concrete_resource<Resource>::value);
   // Test is_concrete_resource with non-resource types
   ASSERT_FALSE(is_concrete_resource<int>::value);
   ASSERT_FALSE(is_concrete_resource<float>::value);
