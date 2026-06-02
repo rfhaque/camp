@@ -367,13 +367,6 @@ namespace resources
        */
       friend inline bool operator==(Hip const& lhs, Hip const& rhs) = default;
 
-      /*
-       * \brief Compares two (Hip) resources to see if they are NOT equal
-       *
-       * \return Negation of == operator
-       */
-      bool operator!=(Hip const &h) const { return !(*this == h); }
-
       size_t get_hash() const
       {
         const size_t hip_type = size_t(get_platform()) << 32;
