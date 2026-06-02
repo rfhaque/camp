@@ -649,9 +649,9 @@ TEST(CampResource, HostCompare)
 template <typename Res>
 void test_id_compare(Event& he)
 {
-  Event e1{Res().get_event()};
-  auto te = Res().get_event();
-  Event e2{te};
+  Event e1 = Res().get_event();
+  Event e2 = Res().get_event_erased();
+  typename Res::event_type te = Res().get_event();
 
   ASSERT_TRUE(e1 == e1);
   ASSERT_TRUE(e2 == e2);
@@ -663,7 +663,7 @@ void test_id_compare(Event& he)
   ASSERT_FALSE(e2 != e2);
   ASSERT_FALSE(e1 == e2);
   ASSERT_FALSE(e2 == e1);
-  ASSERT_FALSE(te!= te);
+  ASSERT_FALSE(te != te);
 
   ASSERT_TRUE(e1 != he);
   ASSERT_TRUE(he != e1);
@@ -675,9 +675,9 @@ void test_id_compare(Event& he)
 //
 TEST(CampEvent, Compare)
 {
-  Event e1{Host().get_event_erased()};
-  auto te = Host().get_event();
-  Event e2{te};
+  Event e1 = Host().get_event();
+  Event e2 = Host().get_event_erased();
+  HostEvent te = Host().get_event();
 
   ASSERT_TRUE(e1 == e1);
   ASSERT_TRUE(e2 == e2);
@@ -708,15 +708,26 @@ TEST(CampEvent, Compare)
 TEST(CampEvent, HostEventCompare)
 {
   HostEvent te = Host().get_default().get_event();
-  Event e2{Host().get_event()};
-  Event e3{Host().get_event_erased()};
+  Event e1 = Host().get_event();
+  Event e2 = Host().get_event_erased();
 
-  ASSERT_TRUE(Event{te} == e2);
-  ASSERT_TRUE(Event{te} == e3);
+  ASSERT_TRUE(e1 == te);
+  ASSERT_TRUE(e1 == e2);
   ASSERT_TRUE(e2 == te);
-  ASSERT_TRUE(e2 == e3);
-  ASSERT_TRUE(e3 == te);
+  ASSERT_TRUE(e2 == e1);
+
+  ASSERT_FALSE(e1 != te);
+  ASSERT_FALSE(e1 != e2);
+  ASSERT_FALSE(e2 != te);
+  ASSERT_FALSE(e2 != e1);
+
+  Event e3{std::move(te)};
+
+  ASSERT_TRUE(e3 == e1);
   ASSERT_TRUE(e3 == e2);
+
+  ASSERT_FALSE(e3 != e1);
+  ASSERT_FALSE(e3 != e2);
 }
 
 template <typename Res>
