@@ -209,6 +209,8 @@ namespace resources
         m_value->wait();
       }
 
+      explicit operator bool() const { return static_cast<bool>(m_value); }
+
       /*
        * \brief Compares two Resources to see if they are equal. Two Resources
        * are equal if they have the platform and same stream/queue

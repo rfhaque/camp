@@ -123,6 +123,8 @@ namespace resources
 
       void wait() const { if (m_value) { m_value->wait(); } }
 
+      explicit operator bool() const { return static_cast<bool>(m_value); }
+
       /*
        * \brief Compares two Events to see if they represent the same underlying
        *        typed event. Two Events are equal if they have the platform and
