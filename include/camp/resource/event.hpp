@@ -42,16 +42,10 @@ namespace resources
       Event &operator=(Event const &e) = default;
       Event &operator=(Event &&e) = default;
 
-      template <
-          typename T,
-          typename std::enable_if<
-              !std::is_same_v<typename std::decay_t<T>, Event> &&
-              !(std::is_convertible<typename std::decay<T>::type *,
-                                    ::camp::resources::detail::EventProxyBase
-                                        *>::value)>::type * = nullptr>
-      Event(T &&value)
+      template <camp::concepts::ConcreteEvent T>
+      explicit Event(T &&value)
       {
-        m_value.reset(new EventModel<type::ref::rem<T>>(value));
+        m_value.reset(new EventModel<type::ref::rem<T>>(std::forward<T>(value)));
       }
 
       template <typename T>

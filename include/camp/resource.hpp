@@ -41,11 +41,7 @@ namespace resources
       Resource &operator=(Resource &&) = default;
       Resource &operator=(Resource const &) = default;
 
-      template <typename T,
-                typename = typename std::enable_if_t<
-                    !std::is_same_v<typename std::decay_t<T>, Resource>
-                    && is_concrete_resource_v<T>>
-                >
+      template <camp::concepts::ConcreteResource T>
       Resource(T &&value)
       {
         m_value.reset(new ContextModel<type::ref::rem<T>>(forward<T>(value)));
