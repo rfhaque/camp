@@ -114,9 +114,9 @@ namespace resources
 
       /*
        * \brief Compares two events to see if they represent the same underlying
-       *        cuda event.
+       *        hip event.
        *
-       * \return True if both refer to the same cuda event, false otherwise.
+       * \return True if both refer to the same hip event, false otherwise.
        */
       friend inline bool operator==(HipEvent const& lhs, HipEvent const& rhs) = default;
 
@@ -145,7 +145,7 @@ namespace resources
       static void finalize(hipEvent_t& event)
       {
         if (event != nullptr) {
-          CAMP_CUDA_API_INVOKE_AND_CHECK(hipEventDestroy, event);
+          CAMP_HIP_API_INVOKE_AND_CHECK(hipEventDestroy, event);
           event = nullptr;
         }
       }
@@ -365,10 +365,7 @@ namespace resources
        *
        * \return True or false depending on if this is the same stream
        */
-      bool operator==(Hip const &h) const
-      {
-        return (get_stream() == h.get_stream());
-      }
+      friend inline bool operator==(Hip const& lhs, Hip const& rhs) = default;
 
       /*
        * \brief Compares two (Hip) resources to see if they are NOT equal
@@ -394,6 +391,25 @@ namespace resources
 }  // namespace resources
 }  // namespace camp
 
+namespace std
+{
+/*
+ * \brief Specialization of std::hash for camp::resources::HipEvent
+ *
+ * Provides a hash function for hip typed event objects, enabling their use
+ * as keys in unordered associative containers (std::unordered_map,
+ * std::unordered_set, etc.)
+ *
+ * \return A size_t hash value
+ */
+template <>
+struct hash<camp::resources::HipEvent> {
+  std::size_t operator()(const camp::resources::HipEvent &e) const
+  {
+    return e.get_hash();
+  }
+};
+
 /*
  * \brief Specialization of std::hash for camp::resources::Hip
  *
@@ -403,8 +419,6 @@ namespace resources
  *
  * \return A size_t hash value
  */
-namespace std
-{
 template <>
 struct hash<camp::resources::Hip> {
   std::size_t operator()(const camp::resources::Hip &h) const
@@ -412,6 +426,7 @@ struct hash<camp::resources::Hip> {
     return h.get_hash();
   }
 };
+
 }  // namespace std
 
 #endif  // #ifdef CAMP_ENABLE_HIP
