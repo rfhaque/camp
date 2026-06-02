@@ -362,8 +362,9 @@ namespace resources
 
         void wait() override { m_modelVal.wait(); }
 
-        T const*get() const { return &m_modelVal; }
-        T *get() { return &m_modelVal; }
+        const T* get() const { return &m_modelVal; }
+
+        T* get() { return &m_modelVal; }
 
       private:
         T m_modelVal;
