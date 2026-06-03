@@ -36,6 +36,7 @@ namespace resources
     public:
       using event_type = Event;
 
+      Resource() = default;
       Resource(Resource &&) = default;
       Resource(Resource const &) = default;
       Resource &operator=(Resource &&) = default;

@@ -204,16 +204,13 @@ TEST(CampEvent, GetPlatform)
 
 TEST(CampResource, EmptyBehavior)
 {
+  Resource empty;
+  Resource empty2;
   Resource full{Host()};
   Resource sink{std::move(full)};
-  Resource full2{Host()};
-  Resource sink2{std::move(full2)};
-  Resource& empty = full;
-  Resource& empty2 = full2;
   int value = 7;
 
   CAMP_ALLOW_UNUSED_LOCAL(sink);
-  CAMP_ALLOW_UNUSED_LOCAL(sink2);
 
   ASSERT_FALSE(empty);
   ASSERT_EQ(empty.get_platform(), Platform::undefined);
@@ -352,6 +349,10 @@ void test_vector(Resource& h)
   ASSERT_EQ(vec[1], h);
   ASSERT_EQ(vec[2], d1);
   ASSERT_EQ(vec[3], r1);
+
+  vec.resize(6);
+  ASSERT_FALSE(vec[4]);
+  ASSERT_FALSE(vec[5]);
 
   // Typed
   ASSERT_EQ(rvec.size(), 3);
