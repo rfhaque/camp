@@ -1491,3 +1491,104 @@ TEST(CampResourceMemory, Sycl)
   test_memory_ops<Sycl>(MemoryAccess::Managed);
 }
 #endif
+
+#ifdef CAMP_HAVE_CUDA
+TEST(CampCuda, Helpers)
+{
+  int current_device = -1;
+  cudaStream_t stream;
+  CAMP_CUDA_API_INVOKE_AND_CHECK(cudaGetDevice, &current_device);
+  CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamCreate, &stream);
+
+  Cuda resource = Cuda::CudaFromStream(stream, current_device);
+  ASSERT_EQ(resource.get_device(), current_device);
+  ASSERT_EQ(resource.get_stream(), stream);
+
+  {
+    auto event = resource.get_event();
+    ASSERT_NE(event.getCudaEvent_t(), nullptr);
+  }
+
+  CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamDestroy, stream);
+}
+#endif
+
+#ifdef CAMP_HAVE_HIP
+TEST(CampHip, Helpers)
+{
+  int current_device = -1;
+  hipStream_t stream;
+  CAMP_HIP_API_INVOKE_AND_CHECK(hipGetDevice, &current_device);
+  CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamCreate, &stream);
+
+  Hip resource = Hip::HipFromStream(stream, current_device);
+  ASSERT_EQ(resource.get_device(), current_device);
+  ASSERT_EQ(resource.get_stream(), stream);
+
+  {
+    auto event = resource.get_event();
+    ASSERT_NE(event.getHipEvent_t(), nullptr);
+  }
+
+  CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamDestroy, stream);
+}
+#endif
+
+#ifdef CAMP_HAVE_OMP_OFFLOAD
+TEST(CampOmp, Helpers)
+{
+  char a[1];
+  Omp resource = Omp::OmpFromAddr(&a[0]);
+
+  ASSERT_EQ(resource.get_platform(), Platform::omp_target);
+  ASSERT_EQ(resource.get_depend_location(), &a[0]);
+  ASSERT_EQ(resource.get_device(), omp_get_default_device());
+
+  {
+    auto event = resource.get_event();
+    ASSERT_EQ(event.getEventAddr(), &a[0]);
+  }
+
+  auto* ptr = resource.allocate<unsigned char>(16);
+  ASSERT_EQ(resource.get_ptr_dev(ptr), resource.get_device());
+  resource.deallocate(ptr);
+  ASSERT_EQ(resource.get_ptr_dev(&ptr), omp_get_initial_device());
+
+  ASSERT_THROW((void)resource.allocate<unsigned char>(1, MemoryAccess::Pinned),
+               std::runtime_error);
+  ASSERT_THROW((void)resource.calloc(1, MemoryAccess::Managed),
+               std::runtime_error);
+  ASSERT_THROW((void)resource.deallocate(&ptr, MemoryAccess::Pinned),
+               std::runtime_error);
+}
+#endif
+
+#ifdef CAMP_HAVE_SYCL
+TEST(CampSycl, Helpers)
+{
+  sycl::context original_default = Sycl::get_default_context();
+  sycl::context original_thread = Sycl::get_thread_default_context();
+  sycl::context new_context;
+
+  Sycl::set_default_context(new_context);
+  ASSERT_EQ(Sycl::get_default_context(), new_context);
+  Sycl::set_thread_default_context(new_context);
+  ASSERT_EQ(Sycl::get_thread_default_context(), new_context);
+
+  auto gpuSelector = sycl::gpu_selector_v;
+  sycl::property_list ordered_properties(
+      sycl::property::queue::in_order());
+  sycl::queue ordered_queue(new_context, gpuSelector, ordered_properties);
+  Sycl resource = Sycl::SyclFromQueue(ordered_queue);
+  ASSERT_EQ(resource.get_queue(), ordered_queue);
+
+  auto event = resource.get_event();
+  ASSERT_EQ(event.getSyclEvent_t(), event.getSyclEvent_t());
+
+  sycl::queue unordered_queue(new_context, gpuSelector);
+  ASSERT_THROW((void)SyclEvent(unordered_queue), std::runtime_error);
+
+  Sycl::set_default_context(original_default);
+  Sycl::set_thread_default_context(original_thread);
+}
+#endif
