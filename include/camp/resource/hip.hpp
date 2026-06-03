@@ -18,6 +18,7 @@
 
 #include <array>
 #include <mutex>
+#include <utility>
 
 #include "camp/defines.hpp"
 #include "camp/helpers.hpp"
