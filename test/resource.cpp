@@ -112,7 +112,7 @@ TEST(CampResource, Copy)
 template <typename Res, typename Res2>
 void test_convert_fails()
 {
-  Resource r{Res()};
+  const Resource r{Res()};
   r.get<Res>();
   ASSERT_THROW(r.get<Res2>(), std::runtime_error);
   ASSERT_FALSE(r.try_get<Res2>());
@@ -139,7 +139,7 @@ TEST(CampResource, ConvertFails)
 template <typename Res>
 void test_convert_works(Platform platform)
 {
-  Resource r{Res()};
+  const Resource r{Res()};
   ASSERT_TRUE(r.try_get<Res>());
   ASSERT_EQ(r.get<Res>().get_platform(), platform);
 }
@@ -249,8 +249,8 @@ TEST(CampResource, EmptyBehavior)
 
 TEST(CampEvent, EmptyBehavior)
 {
-  Event empty;
-  Event empty2;
+  const Event empty;
+  const Event empty2;
 
   ASSERT_FALSE(empty);
   ASSERT_EQ(empty.get_platform(), Platform::undefined);
@@ -262,7 +262,7 @@ TEST(CampEvent, EmptyBehavior)
   ASSERT_FALSE(empty.try_get<HostEvent>());
   ASSERT_THROW((void)empty.get<HostEvent>(), std::runtime_error);
 
-  Event host_event{Host().get_event()};
+  const Event host_event{Host().get_event()};
   ASSERT_TRUE(host_event);
   ASSERT_TRUE(host_event.try_get<HostEvent>());
   ASSERT_FALSE(host_event.try_get<HostEvent2>());
@@ -715,6 +715,9 @@ void test_id_compare(Resource& h1)
   Res r;
   Resource r2{r};
   Resource r3{Res(0)};  // should be same as r1
+  const Resource cr{Res()};
+  const Resource& ch1 = h1;
+  const Res& ctr = cr.get<Res>();
 
   EXPECT_EQ(r1, r3);
 
@@ -735,6 +738,12 @@ void test_id_compare(Resource& h1)
 
   ASSERT_FALSE(r1 == h1);
   ASSERT_FALSE(h1 == r1);
+
+  ASSERT_TRUE(cr == ctr);
+  ASSERT_FALSE(cr != ctr);
+
+  ASSERT_FALSE(ch1 == ctr);
+  ASSERT_TRUE(ch1 != ctr);
 }
 
 //
@@ -743,6 +752,8 @@ TEST(CampResource, Compare)
   Resource h1{Host()};
   Host h;
   Resource h2{h};
+  const Resource ch{Host()};
+  const Host& cth = ch.get<Host>();
 
   ASSERT_TRUE(h1 == h1);
   ASSERT_TRUE(h2 == h2);
@@ -755,6 +766,8 @@ TEST(CampResource, Compare)
   ASSERT_FALSE(h1 != h2);
   ASSERT_FALSE(h2 != h1);
   ASSERT_FALSE(h != h);
+  ASSERT_TRUE(ch == cth);
+  ASSERT_FALSE(ch != cth);
 
 #ifdef CAMP_HAVE_CUDA
   test_id_compare<Cuda>(h1);
@@ -840,6 +853,9 @@ void test_id_compare(Event& he)
   Event e1 = Res().get_event();
   Event e2 = Res().get_event_erased();
   typename Res::event_type te = Res().get_event();
+  const Event ce = Res().get_event_erased();
+  const Event& che = he;
+  const typename Res::event_type& cte = ce.get<typename Res::event_type>();
 
   ASSERT_TRUE(e1 == e1);
   ASSERT_TRUE(e2 == e2);
@@ -858,6 +874,12 @@ void test_id_compare(Event& he)
 
   ASSERT_FALSE(e1 == he);
   ASSERT_FALSE(he == e1);
+
+  ASSERT_TRUE(ce == cte);
+  ASSERT_FALSE(ce != cte);
+
+  ASSERT_FALSE(che == cte);
+  ASSERT_TRUE(che != cte);
 }
 
 //
@@ -898,16 +920,20 @@ TEST(CampEvent, HostEventCompare)
   HostEvent te = Host().get_default().get_event();
   Event e1 = Host().get_event();
   Event e2 = Host().get_event_erased();
+  const Event ce = Host().get_event_erased();
+  const HostEvent& cte = ce.get<HostEvent>();
 
   ASSERT_TRUE(e1 == te);
   ASSERT_TRUE(e1 == e2);
   ASSERT_TRUE(e2 == te);
   ASSERT_TRUE(e2 == e1);
+  ASSERT_TRUE(ce == cte);
 
   ASSERT_FALSE(e1 != te);
   ASSERT_FALSE(e1 != e2);
   ASSERT_FALSE(e2 != te);
   ASSERT_FALSE(e2 != e1);
+  ASSERT_FALSE(ce != cte);
 
   Event e3{std::move(te)};
 
@@ -1009,8 +1035,10 @@ TEST(CampResource, StreamSelect)
 template <typename Res>
 void test_get()
 {
-  Resource dev_res{Res()};
-  auto erased_res = dev_res.get<Res>();
+  const Resource dev_res{Res()};
+  static_assert(std::is_same_v<decltype(dev_res.template get<Res>()),
+                               const Res&>);
+  const auto& erased_res = dev_res.get<Res>();
   Res pure_res;
   ASSERT_EQ(typeid(erased_res), typeid(pure_res));
 }
@@ -1550,11 +1578,12 @@ TEST(CampCuda, Helpers)
   CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamCreate, &stream);
 
   Cuda resource = Cuda::CudaFromStream(stream, current_device);
-  ASSERT_EQ(resource.get_device(), current_device);
-  ASSERT_EQ(resource.get_stream(), stream);
+  const Cuda& const_resource = resource;
+  ASSERT_EQ(const_resource.get_device(), current_device);
+  ASSERT_EQ(const_resource.get_stream(), stream);
 
   {
-    auto event = resource.get_event();
+    const auto event = resource.get_event();
     ASSERT_NE(event.getCudaEvent_t(), nullptr);
   }
 
@@ -1571,11 +1600,12 @@ TEST(CampHip, Helpers)
   CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamCreate, &stream);
 
   Hip resource = Hip::HipFromStream(stream, current_device);
-  ASSERT_EQ(resource.get_device(), current_device);
-  ASSERT_EQ(resource.get_stream(), stream);
+  const Hip& const_resource = resource;
+  ASSERT_EQ(const_resource.get_device(), current_device);
+  ASSERT_EQ(const_resource.get_stream(), stream);
 
   {
-    auto event = resource.get_event();
+    const auto event = resource.get_event();
     ASSERT_NE(event.getHipEvent_t(), nullptr);
   }
 
@@ -1588,13 +1618,14 @@ TEST(CampOmp, Helpers)
 {
   char a[1];
   Omp resource = Omp::OmpFromAddr(&a[0]);
+  const Omp& const_resource = resource;
 
-  ASSERT_EQ(resource.get_platform(), Platform::omp_target);
-  ASSERT_EQ(resource.get_depend_location(), &a[0]);
-  ASSERT_EQ(resource.get_device(), omp_get_default_device());
+  ASSERT_EQ(const_resource.get_platform(), Platform::omp_target);
+  ASSERT_EQ(const_resource.get_depend_location(), &a[0]);
+  ASSERT_EQ(const_resource.get_device(), omp_get_default_device());
 
   {
-    auto event = resource.get_event();
+    const auto event = resource.get_event();
     ASSERT_EQ(event.getEventAddr(), &a[0]);
   }
 
@@ -1629,9 +1660,10 @@ TEST(CampSycl, Helpers)
       sycl::property::queue::in_order());
   sycl::queue ordered_queue(new_context, gpuSelector, ordered_properties);
   Sycl resource = Sycl::SyclFromQueue(ordered_queue);
-  ASSERT_EQ(resource.get_queue(), ordered_queue);
+  const Sycl& const_resource = resource;
+  ASSERT_EQ(const_resource.get_queue(), ordered_queue);
 
-  auto event = resource.get_event();
+  const auto event = resource.get_event();
   ASSERT_EQ(event.getSyclEvent_t(), event.getSyclEvent_t());
 
   sycl::queue unordered_queue(new_context, gpuSelector);
