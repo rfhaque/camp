@@ -16,6 +16,7 @@
 
 #include <omp.h>
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -190,6 +191,8 @@ namespace resources
         {
         }
       }
+
+      void wait_for(std::nullptr_t) {}
 
       void wait_for(OmpEvent *e)
       {

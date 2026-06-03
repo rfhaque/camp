@@ -10,6 +10,7 @@
 #ifndef __CAMP_HOST_HPP
 #define __CAMP_HOST_HPP
 
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 
@@ -96,6 +97,8 @@ namespace resources
       Event get_event_erased() { return Event{get_event()}; }
 
       void wait() {}
+
+      void wait_for(std::nullptr_t) {}
 
       void wait_for(HostEvent *e)
       {

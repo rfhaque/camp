@@ -16,6 +16,7 @@
 
 #include <hip/hip_runtime.h>
 
+#include <cstddef>
 #include <array>
 #include <mutex>
 #include <utility>
@@ -254,6 +255,8 @@ namespace resources
         auto d{device_guard(device)};
         CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamSynchronize, stream);
       }
+
+      void wait_for(std::nullptr_t) {}
 
       void wait_for(HipEvent *e)
       {

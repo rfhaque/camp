@@ -14,6 +14,7 @@
 
 #ifdef CAMP_ENABLE_SYCL
 
+#include <cstddef>
 #include <array>
 #include <map>
 #include <mutex>
@@ -317,6 +318,8 @@ namespace resources
       Event get_event_erased() { return Event{get_event()}; }
 
       void wait() { qu.wait(); }
+
+      void wait_for(std::nullptr_t) {}
 
       void wait_for(SyclEvent* e)
       {

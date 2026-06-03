@@ -16,6 +16,7 @@
 
 #include <cuda_runtime.h>
 
+#include <cstddef>
 #include <array>
 #include <mutex>
 #include <utility>
@@ -253,6 +254,8 @@ namespace resources
         auto d{device_guard(device)};
         CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamSynchronize, stream);
       }
+
+      void wait_for(std::nullptr_t) {}
 
       void wait_for(CudaEvent *e)
       {
