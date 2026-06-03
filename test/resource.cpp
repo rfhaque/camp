@@ -1075,10 +1075,13 @@ void test_wait()
 {
   auto r = Res();
   r.wait();
+  r.wait_for(nullptr);
   Event erased_event = r.get_event_erased();
   r.wait_for(&erased_event);
   auto typed_event = r.get_event();
   r.wait_for(&typed_event);
+  Event host_event = Host().get_event_erased();
+  r.wait_for(&host_event);
   Resource er(r);
   er.wait();
 }
