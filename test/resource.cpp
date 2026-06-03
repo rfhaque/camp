@@ -1181,6 +1181,72 @@ TEST(CampEvent, Get)
 #endif
 }
 
+template <typename Res, typename... EventArgs>
+void test_get_const_typed_event(EventArgs&&... eventArgs)
+{
+  using ResEvent = typename Res::event_type;
+
+  Resource r{Res()};
+  const Event erased_event = r.get_event();
+
+  static_assert(
+      std::is_same_v<decltype(erased_event.template try_get<ResEvent>()),
+                     const ResEvent*>);
+  static_assert(
+      std::is_same_v<decltype(erased_event.template get<ResEvent>()),
+                     const ResEvent&>);
+
+  const ResEvent* typed_event_ptr = erased_event.template try_get<ResEvent>();
+  ASSERT_NE(typed_event_ptr, nullptr);
+  ASSERT_FALSE(erased_event.template try_get<HostEvent2>());
+
+  const auto& typed_event = erased_event.template get<ResEvent>();
+  ASSERT_EQ(typed_event_ptr, &typed_event);
+  ASSERT_THROW((void)erased_event.template get<HostEvent2>(),
+               std::runtime_error);
+
+  ResEvent event(std::forward<EventArgs>(eventArgs)...);
+  ASSERT_EQ(typeid(event), typeid(typed_event));
+}
+
+//
+TEST(CampEvent, GetConst)
+{
+  test_get_const_typed_event<Host>();
+#if defined(CAMP_HAVE_CUDA)
+  {
+    cudaStream_t s;
+    CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamCreate, &s);
+    test_get_const_typed_event<Cuda>(s);
+    CAMP_CUDA_API_INVOKE_AND_CHECK(cudaStreamDestroy, s);
+  }
+#endif
+#if defined(CAMP_HAVE_HIP)
+  {
+    hipStream_t s;
+    CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamCreate, &s);
+    test_get_const_typed_event<Hip>(s);
+    CAMP_HIP_API_INVOKE_AND_CHECK(hipStreamDestroy, s);
+  }
+#endif
+#ifdef CAMP_HAVE_OMP_OFFLOAD
+  {
+    char a[1];
+    test_get_const_typed_event<Omp>(&a[0]);
+  }
+#endif
+#ifdef CAMP_HAVE_SYCL
+  {
+    auto gpuSelector = sycl::gpu_selector_v;
+    sycl::property_list propertyList =
+        sycl::property_list(sycl::property::queue::in_order());
+    sycl::context context;
+    sycl::queue q(context, gpuSelector, propertyList);
+    test_get_const_typed_event<Sycl>(q);
+  }
+#endif
+}
+
 template <typename Res>
 static EventProxy<Res> do_stuff(Res r)
 {
