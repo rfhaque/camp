@@ -292,19 +292,19 @@ namespace resources
             case MemoryAccess::Unknown:
             case MemoryAccess::Device:
               CAMP_CUDA_API_INVOKE_AND_CHECK(cudaMalloc,
-                                             &ret,
+                                             (void **)&ret,
                                              sizeof(T) * size);
               break;
             case MemoryAccess::Pinned:
               // TODO: do a test here for whether managed is *actually* shared
               // so we can use the better performing memory
               CAMP_CUDA_API_INVOKE_AND_CHECK(cudaMallocHost,
-                                             &ret,
+                                             (void **)&ret,
                                              sizeof(T) * size);
               break;
             case MemoryAccess::Managed:
               CAMP_CUDA_API_INVOKE_AND_CHECK(cudaMallocManaged,
-                                             &ret,
+                                             (void **)&ret,
                                              sizeof(T) * size);
               break;
           }
@@ -339,6 +339,7 @@ namespace resources
             break;
           case MemoryAccess::Unknown:
             ::camp::throw_re("Unknown memory access type, cannot free");
+            break;
         }
       }
 

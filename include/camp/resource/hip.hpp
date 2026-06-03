@@ -269,6 +269,7 @@ namespace resources
                                       e->getHipEvent_t(),
                                       0);
       }
+
       void wait_for(Event *e)
       {
         if (!e) {
@@ -390,6 +391,7 @@ namespace resources
 
 namespace std
 {
+
 /*
  * \brief Specialization of std::hash for camp::resources::HipEvent
  *
