@@ -1700,6 +1700,14 @@ TEST(CampOmp, Helpers)
   resource.deallocate(ptr);
   ASSERT_EQ(resource.get_ptr_dev(&ptr), omp_get_initial_device());
 
+  unsigned char manual_registration_token = 0;
+  resource.register_ptr_dev(&manual_registration_token, resource.get_device());
+  ASSERT_EQ(resource.get_ptr_dev(&manual_registration_token),
+            resource.get_device());
+  resource.deregister_ptr_dev(&manual_registration_token);
+  ASSERT_EQ(resource.get_ptr_dev(&manual_registration_token),
+            omp_get_initial_device());
+
   ASSERT_THROW((void)resource.allocate<unsigned char>(1, MemoryAccess::Pinned),
                std::runtime_error);
   ASSERT_THROW((void)resource.calloc(1, MemoryAccess::Managed),

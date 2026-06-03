@@ -242,10 +242,7 @@ namespace resources
       void deallocate(void *p, MemoryAccess ma = MemoryAccess::Device)
       {
         check_ma(ma);
-#pragma omp critical(camp_register_ptr)
-        {
-          get_dev_register().erase(p);
-        }
+        deregister_ptr_dev(p);
         omp_target_free(p, dev);
       }
 
@@ -275,6 +272,14 @@ namespace resources
 #pragma omp critical(camp_register_ptr)
         {
           get_dev_register()[p] = device;
+        }
+      }
+
+      void deregister_ptr_dev(void const *p)
+      {
+#pragma omp critical(camp_register_ptr)
+        {
+          get_dev_register().erase(p);
         }
       }
 
