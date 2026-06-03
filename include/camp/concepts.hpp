@@ -381,7 +381,7 @@ namespace resources
 
     template <typename T>
     struct is_concrete_resource
-        : is_concrete_resource_impl<typename std::decay_t<T>> {
+        : is_concrete_resource_impl<typename std::remove_cvref_t<T>> {
     };
 
     template <typename T>
