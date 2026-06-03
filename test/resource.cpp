@@ -249,13 +249,16 @@ TEST(CampResource, Vector)
 {
   Resource h{Host()};
   test_vector<Host>(h);
-#if defined(CAMP_HAVE_CUDA)
+#ifdef CAMP_HAVE_CUDA
   test_vector<Cuda>(h);
-#elif defined(CAMP_HAVE_HIP)
+#endif
+#ifdef CAMP_HAVE_HIP
   test_vector<Hip>(h);
-#elif defined(CAMP_HAVE_OMP_OFFLOAD)
+#endif
+#ifdef CAMP_HAVE_OMP_OFFLOAD
   test_vector<Omp>(h);
-#elif defined(CAMP_HAVE_SYCL)
+#endif
+#ifdef CAMP_HAVE_SYCL
   test_vector<Sycl>(h);
 #endif
 }
@@ -329,13 +332,16 @@ TEST(CampEvent, Vector)
 {
   Event he = Host().get_event_erased();
   test_vector<Host>(he);
-#if defined(CAMP_HAVE_CUDA)
+#ifdef CAMP_HAVE_CUDA
   test_vector<Cuda>(he);
-#elif defined(CAMP_HAVE_HIP)
+#endif
+#ifdef CAMP_HAVE_HIP
   test_vector<Hip>(he);
-#elif defined(CAMP_HAVE_OMP_OFFLOAD)
+#endif
+#ifdef CAMP_HAVE_OMP_OFFLOAD
   test_vector<Omp>(he);
-#elif defined(CAMP_HAVE_SYCL)
+#endif
+#ifdef CAMP_HAVE_SYCL
   test_vector<Sycl>(he);
 #endif
 }
@@ -435,13 +441,16 @@ TEST(CampResource, UnorderedMapKey)
 {
   Resource h{Host()};
   test_map_key<Host>(h);
-#if defined(CAMP_HAVE_CUDA)
+#ifdef CAMP_HAVE_CUDA
   test_map_key<Cuda>(h);
-#elif defined(CAMP_HAVE_HIP)
+#endif
+#ifdef CAMP_HAVE_HIP
   test_map_key<Hip>(h);
-#elif defined(CAMP_HAVE_OMP_OFFLOAD)
+#endif
+#ifdef CAMP_HAVE_OMP_OFFLOAD
   test_map_key<Omp>(h);
-#elif defined(CAMP_HAVE_SYCL)
+#endif
+#ifdef CAMP_HAVE_SYCL
   test_map_key<Sycl>(h);
 #endif
 }
@@ -565,13 +574,16 @@ TEST(CampEvent, UnorderedMapKey)
 {
   Event he = Host().get_event_erased();
   test_map_key<Host>(he);
-#if defined(CAMP_HAVE_CUDA)
+#ifdef CAMP_HAVE_CUDA
   test_map_key<Cuda>(he);
-#elif defined(CAMP_HAVE_HIP)
+#endif
+#ifdef CAMP_HAVE_HIP
   test_map_key<Hip>(he);
-#elif defined(CAMP_HAVE_OMP_OFFLOAD)
+#endif
+#ifdef CAMP_HAVE_OMP_OFFLOAD
   test_map_key<Omp>(he);
-#elif defined(CAMP_HAVE_SYCL)
+#endif
+#ifdef CAMP_HAVE_SYCL
   test_map_key<Sycl>(he);
 #endif
 }
