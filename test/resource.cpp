@@ -201,6 +201,73 @@ TEST(CampEvent, GetPlatform)
 #endif
 }
 
+TEST(CampResource, EmptyBehavior)
+{
+  Resource full{Host()};
+  Resource sink{std::move(full)};
+  Resource full2{Host()};
+  Resource sink2{std::move(full2)};
+  Resource& empty = full;
+  Resource& empty2 = full2;
+  int value = 7;
+
+  CAMP_ALLOW_UNUSED_LOCAL(sink);
+  CAMP_ALLOW_UNUSED_LOCAL(sink2);
+
+  ASSERT_FALSE(empty);
+  ASSERT_EQ(empty.get_platform(), Platform::undefined);
+  ASSERT_EQ(empty, empty2);
+  ASSERT_NE(empty, Resource{Host()});
+  ASSERT_EQ(std::hash<Resource>{}(empty), 0u);
+
+  ASSERT_EQ(empty.allocate<int>(0), nullptr);
+  ASSERT_EQ(empty.calloc(0), nullptr);
+  empty.deallocate(nullptr);
+  empty.memcpy(&value, &value, 0);
+  empty.memset(&value, 0, 0);
+  empty.wait();
+  empty.wait_for(nullptr);
+
+  ASSERT_THROW((void)empty.get<Host>(), std::runtime_error);
+  ASSERT_FALSE(empty.try_get<Host>());
+  ASSERT_THROW((void)empty.allocate<int>(1), std::runtime_error);
+  ASSERT_THROW((void)empty.calloc(1), std::runtime_error);
+  ASSERT_THROW(empty.deallocate(&value), std::runtime_error);
+  ASSERT_THROW(empty.memcpy(&value, &value, 1), std::runtime_error);
+  ASSERT_THROW(empty.memset(&value, 0, 1), std::runtime_error);
+
+  Event empty_event = empty.get_event();
+  Event empty_erased_event = empty.get_event_erased();
+  ASSERT_FALSE(empty_event);
+  ASSERT_FALSE(empty_erased_event);
+  ASSERT_EQ(empty_event, empty_erased_event);
+
+  Event host_event = Host().get_event_erased();
+  empty.wait_for(&host_event);
+}
+
+TEST(CampEvent, EmptyBehavior)
+{
+  Event empty;
+  Event empty2;
+
+  ASSERT_FALSE(empty);
+  ASSERT_EQ(empty.get_platform(), Platform::undefined);
+  ASSERT_TRUE(empty.check());
+  empty.wait();
+  ASSERT_EQ(empty, empty2);
+  ASSERT_NE(empty, Host().get_event_erased());
+  ASSERT_EQ(std::hash<Event>{}(empty), 0u);
+  ASSERT_FALSE(empty.try_get<HostEvent>());
+  ASSERT_THROW((void)empty.get<HostEvent>(), std::runtime_error);
+
+  Event host_event{Host().get_event()};
+  ASSERT_TRUE(host_event);
+  ASSERT_TRUE(host_event.try_get<HostEvent>());
+  ASSERT_FALSE(host_event.try_get<HostEvent2>());
+  ASSERT_THROW((void)host_event.get<HostEvent2>(), std::runtime_error);
+}
+
 TEST(CampPlatform, ResourceFromPlatform)
 {
   ASSERT_TRUE((std::is_same_v<resource_from_platform<Platform::host>::type,
