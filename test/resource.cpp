@@ -225,7 +225,7 @@ void test_vector(Resource& h)
   rvec.emplace_back(d2.get<Res>());
   rvec.emplace_back(r2);
 
-  // Verify using Resource in a vector to works
+  // Verify using Resource in a vector works
   // Generic
   ASSERT_EQ(vec.size(), 4);
   ASSERT_EQ(vec[0], h);
