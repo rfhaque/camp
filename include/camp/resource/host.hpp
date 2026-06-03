@@ -113,7 +113,11 @@ namespace resources
         if (!e) {
           return;
         }
-        e->wait();
+        if (auto host_event = e->try_get<HostEvent>()) {
+          wait_for(host_event);
+        } else {
+          e->wait();
+        }
       }
 
       // Memory
