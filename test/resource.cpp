@@ -1859,8 +1859,8 @@ TEST(CampResourceSycl, Helpers)
   ASSERT_EQ(Sycl::get_thread_default_context(), new_context);
 
   auto gpuSelector = sycl::gpu_selector_v;
-  sycl::property_list ordered_properties(
-      sycl::property::queue::in_order());
+  sycl::property_list ordered_properties =
+      sycl::property_list(sycl::property::queue::in_order());
   sycl::queue ordered_queue(new_context, gpuSelector, ordered_properties);
   Sycl resource = Sycl::SyclFromQueue(ordered_queue);
   const Sycl& const_resource = resource;
