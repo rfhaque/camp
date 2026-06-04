@@ -1563,7 +1563,7 @@ void test_concrete_resource_trait()
   ASSERT_TRUE(is_concrete_resource<Res&&>::value);
 }
 //
-TEST(CampResourceTypeTraits, ConcreteResource)
+TEST(CampResource, ConcreteResourceTypeTrait)
 {
   test_concrete_resource_trait<Host>();
 
@@ -1606,7 +1606,7 @@ void test_concrete_event_trait()
   ASSERT_TRUE(is_concrete_event<Evt&&>::value);
 }
 //
-TEST(CampResourceTypeTraits, ConcreteEvent)
+TEST(CampEvent, ConcreteEventTypeTrait)
 {
   test_concrete_event_trait<HostEvent>();
 
@@ -1714,13 +1714,13 @@ void test_inferred_deallocate(MemoryAccess access)
   r.deallocate(ptr);
 }
 
-TEST(CampResourceMemory, Host)
+TEST(CampResource, MemoryHost)
 {
   test_memory_ops<Host>(MemoryAccess::Device);
 }
 
 #ifdef CAMP_HAVE_CUDA
-TEST(CampResourceMemory, Cuda)
+TEST(CampResource, MemoryCuda)
 {
   test_memory_ops<Cuda>(MemoryAccess::Unknown);
   test_memory_ops<Cuda>(MemoryAccess::Device);
@@ -1734,7 +1734,7 @@ TEST(CampResourceMemory, Cuda)
 #endif
 
 #ifdef CAMP_HAVE_HIP
-TEST(CampResourceMemory, Hip)
+TEST(CampResource, MemoryHip)
 {
   test_memory_ops<Hip>(MemoryAccess::Unknown);
   test_memory_ops<Hip>(MemoryAccess::Device);
@@ -1748,14 +1748,14 @@ TEST(CampResourceMemory, Hip)
 #endif
 
 #ifdef CAMP_HAVE_OMP_OFFLOAD
-TEST(CampResourceMemory, Omp)
+TEST(CampResource, MemoryOmp)
 {
   test_memory_ops<Omp>(MemoryAccess::Device);
 }
 #endif
 
 #ifdef CAMP_HAVE_SYCL
-TEST(CampResourceMemory, Sycl)
+TEST(CampResource, MemorySycl)
 {
   test_memory_ops<Sycl>(MemoryAccess::Unknown);
   test_memory_ops<Sycl>(MemoryAccess::Device);
@@ -1765,7 +1765,7 @@ TEST(CampResourceMemory, Sycl)
 #endif
 
 #ifdef CAMP_HAVE_CUDA
-TEST(CampCuda, Helpers)
+TEST(CampResourceCuda, Helpers)
 {
   int current_device = -1;
   cudaStream_t stream;
@@ -1787,7 +1787,7 @@ TEST(CampCuda, Helpers)
 #endif
 
 #ifdef CAMP_HAVE_HIP
-TEST(CampHip, Helpers)
+TEST(CampResourceHip, Helpers)
 {
   int current_device = -1;
   hipStream_t stream;
@@ -1809,7 +1809,7 @@ TEST(CampHip, Helpers)
 #endif
 
 #ifdef CAMP_HAVE_OMP_OFFLOAD
-TEST(CampOmp, Helpers)
+TEST(CampResourceOmp, Helpers)
 {
   char a[1];
   Omp resource = Omp::OmpFromAddr(&a[0]);
@@ -1847,7 +1847,7 @@ TEST(CampOmp, Helpers)
 #endif
 
 #ifdef CAMP_HAVE_SYCL
-TEST(CampSycl, Helpers)
+TEST(CampResourceSycl, Helpers)
 {
   sycl::context original_default = Sycl::get_default_context();
   sycl::context original_thread = Sycl::get_thread_default_context();
